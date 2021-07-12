@@ -2,42 +2,48 @@ import React from 'react';
 import axios from 'axios';
 import './App.css';
 import GitHubCard from './components/GitHubCard';
+import UserFollowers from './components/UserFollowers';
 
-const fetchingGitUser = (user) => {
-  return axios.get('https://api.github.com/users/MahDudeGarrus')
+class App extends React.Component { 
+constructor() {
+  super();
+  this.state = {
+    gitUser: {},
+    followers: [],
+  }
+}
+
+  componentDidMount(){
+    axios.get('https://api.github.com/users/MahDudeGarrus')
     .then(res => {
       console.log("git user fetch res: ", res.data)
+      this.setState({gitUser: res.data})
     })
     .catch(err => {
       console.log("git user fetch error: ", err)
     })
-}
-console.log(fetchingGitUser())
 
-class App extends React.Component {
-  state = {
-    login: '',
-    name: '',
-    location: '',
-    followers: '',
-    following: '',
-    bio: '',
+    axios.get('https://api.github.com/users/MahDudeGarrus/followers')
+    .then(res => {
+      console.log('git followers fetch res: ', res.data)
+      this.setState({followers: res.data})
+    }, [])
+    .catch(err => {
+      console.log('git followers fetch error: ', err)
+    })
   }
 
-  // componentDidMount(){
-  //   fetchingGitUser(this.state.login)
-  //     .then(res => {
-  //       this.setState({
-  //         login: res.data.login
-  //       })
-  //     })
-  // }
-
   render() {
+    const gitUser = ['']
     return (
       <div className="App">
         <h1>HELLO? Is it me you're looking for?</h1>
-        <GitHubCard />
+        <GitHubCard gitUser={this.state.gitUser} />
+        {this.state.followers.map(follower => {
+          return (
+            <UserFollowers follower={follower} key={follower.id} />
+          )
+        })}
       </div>
     )
   }
